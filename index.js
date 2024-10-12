@@ -13,7 +13,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 const { initializeDatabase } = require("./db");
 
-const bcrypt = require("bcrypt");
+// const bcrypt = require("bcryptjs");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const postRoute = require("./routes/postRoute");

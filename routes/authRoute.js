@@ -1,6 +1,6 @@
 const authRoute = require("express").Router();
 const UserSocial3 = require("../models/UserSocial3");
-const bcrypt = require("bcrypt"); //encode password for security reasons
+const bcrypt = require("bcryptjs"); //encode password for security reasons
 const jwt = require("jsonwebtoken");
 
 authRoute.post("/register", async (req, res) => {

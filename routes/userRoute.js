@@ -1,7 +1,7 @@
 const userRoute = require("express").Router();
 
 const UserSocial3 = require("../models/UserSocial3");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const PostSocial3 = require("../models/PostSocial3");
 const verifyToken = require("../middlewares/verifyToken");
 
