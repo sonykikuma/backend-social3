@@ -7,6 +7,12 @@ const PostSocial3Schema = new mongoose.Schema(
       ref: "UserSocial3",
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+      min: 4,
+    },
+
     desc: {
       type: String,
       required: true,

@@ -15,6 +15,7 @@ const corsOptions = {
   optionSuccessStatus: 200,
 };
 
+app.use("/images", express.static("public/images"));
 app.use(cors(corsOptions));
 const { initializeDatabase } = require("./db");
 
@@ -23,6 +24,7 @@ const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const postRoute = require("./routes/postRoute");
 const commentRoute = require("./routes/commentRoute");
+const uploadRoute = require("./routes/uploadRoute");
 
 app.use(express.json());
 initializeDatabase();
@@ -45,6 +47,7 @@ app.use("/auth", authRoute);
 app.use("/user", userRoute);
 app.use("/post", postRoute);
 app.use("/comment", commentRoute);
+app.use("/upload", uploadRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello, Express");
