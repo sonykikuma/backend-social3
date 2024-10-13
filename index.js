@@ -5,13 +5,17 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const app = express();
-// const corsOptions = {
-//   origin: "*",
-//   credentials: true,
-//   optionSuccessStatus: 200,
-// };
+const corsOptions = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders:
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
 
-app.use(cors());
+  credentials: true,
+  optionSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 const { initializeDatabase } = require("./db");
 
 // const bcrypt = require("bcryptjs");
