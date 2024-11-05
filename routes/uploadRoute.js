@@ -11,7 +11,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = multer.diskStorage({
+const storage = multer.memoryStorage({
+  //diskStorage
+
   destination: (req, file, cb) => {
     //here cb is callback
     //cb(null, "public/images");
@@ -33,15 +35,30 @@ uploadRoute.post(
   upload.single("image"),
   async (req, res) => {
     try {
-      console.log(req.file); // Log the file to see if multer is correctly receiving it
+      console.log(req.file);
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
-
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "uploads", //folder_name
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "uploads" },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        stream.end(req.file.buffer); // Use file buffer for streaming upload
       });
+
       res.json({ imageUrl: result.secure_url });
+
+      // const result = await cloudinary.uploader.upload(req.file.path, {
+      //   folder: "uploads", //folder_name
+      // });
+      // res.json({ imageUrl: result.secure_url });
 
       //return res.status(200).json({ msg: "image successfully uploaded" });
     } catch (error) {
