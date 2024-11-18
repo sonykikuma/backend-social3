@@ -7,7 +7,10 @@ const mongoose = require("mongoose");
 // get user posts
 postRoute.get("/find/userposts/:id", async (req, res) => {
   try {
-    const posts = await PostSocial3.find({ user: req.params.id });
+    const posts = await PostSocial3.find({ user: req.params.id }).populate(
+      "user",
+      "-password"
+    ); //populated user data
 
     return res.status(200).json(posts);
   } catch (error) {
