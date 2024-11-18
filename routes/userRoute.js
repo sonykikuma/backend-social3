@@ -213,4 +213,20 @@ userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
   }
 });
 
+// Fetching bookmarked posts for a user
+userRoute.get("/bookmarks", verifyToken, async (req, res) => {
+  try {
+    const currentUser = await UserSocial3.findById(req.user.id).populate(
+      "bookmarkedPosts"
+    );
+    if (!currentUser) {
+      return res.status(404).json({ msg: "User not found!" });
+    }
+
+    return res.status(200).json(currentUser.bookmarkedPosts);
+  } catch (error) {
+    return res.status(500).json(error.message);
+  }
+});
+
 module.exports = userRoute;
