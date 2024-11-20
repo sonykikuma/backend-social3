@@ -16,8 +16,8 @@ const corsOptions = {
 };
 
 app.use("/images", express.static("public/images"));
-// app.use(cors(corsOptions));
-app.use(cors());
+app.use(cors(corsOptions));
+//app.use(cors());
 const { initializeDatabase } = require("./db");
 
 // const bcrypt = require("bcryptjs");
