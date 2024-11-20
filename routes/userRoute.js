@@ -182,51 +182,94 @@ userRoute.put("/toggleFollow/:otherUserId", verifyToken, async (req, res) => {
 //bookmark
 userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
   try {
-    const post = await PostSocial3.findById(req.params.postId).populate(
-      "user",
-      "-password"
-    );
+    const post = await PostSocial3.findById(req.params.postId);
     if (!post) {
       return res.status(404).json({ msg: "No such post found" });
+    }
+
+    const user = await UserSocial3.findById(req.user.id);
+    if (user.bookmarkedPosts.includes(req.params.postId)) {
+      // Unbookmark
+      user.bookmarkedPosts = user.bookmarkedPosts.filter(
+        (id) => id.toString() !== req.params.postId
+      );
+      await user.save();
+      return res
+        .status(200)
+        .json({ msg: "Successfully unbookmarked the post" });
     } else {
-      if (
-        post.user.bookmarkedPosts.some((post) => post._id === req.params.postId)
-      ) {
-        await UserSocial3.findByIdAndUpdate(req.user.id, {
-          $pull: { bookmarkedPosts: post },
-        });
-        return res
-          .status(200)
-          .json({ msg: "Successfully unbookmarked the post" });
-      } else {
-        console.log(post);
-        await UserSocial3.findByIdAndUpdate(req.user.id, {
-          $addToSet: { bookmarkedPosts: post },
-        });
-        return res
-          .status(200)
-          .json({ msg: "Successfully boomkarked the post" });
-      }
+      // Bookmark
+      user.bookmarkedPosts.push(req.params.postId);
+      await user.save();
+      return res.status(200).json({ msg: "Successfully bookmarked the post" });
     }
   } catch (error) {
     return res.status(500).json(error.message);
   }
 });
+
+// userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
+//   try {
+//     const post = await PostSocial3.findById(req.params.postId).populate(
+//       "user",
+//       "-password"
+//     );
+//     if (!post) {
+//       return res.status(404).json({ msg: "No such post found" });
+//     } else {
+//       if (
+//         post.user.bookmarkedPosts.some((post) => post._id === req.params.postId)
+//       ) {
+//         await UserSocial3.findByIdAndUpdate(req.user.id, {
+//           $pull: { bookmarkedPosts: post },
+//         });
+//         return res
+//           .status(200)
+//           .json({ msg: "Successfully unbookmarked the post" });
+//       } else {
+//         console.log(post);
+//         await UserSocial3.findByIdAndUpdate(req.user.id, {
+//           $addToSet: { bookmarkedPosts: post },
+//         });
+//         return res
+//           .status(200)
+//           .json({ msg: "Successfully boomkarked the post" });
+//       }
+//     }
+//   } catch (error) {
+//     return res.status(500).json(error.message);
+//   }
+// });
 
 // Fetching bookmarked posts for a user
-userRoute.get("/bookmarks", verifyToken, async (req, res) => {
+userRoute.get("/bookmarkedPosts", verifyToken, async (req, res) => {
   try {
-    const currentUser = await UserSocial3.findById(req.user.id).populate(
-      "bookmarkedPosts"
-    );
-    if (!currentUser) {
-      return res.status(404).json({ msg: "User not found!" });
+    const user = await UserSocial3.findById(req.user.id).populate({
+      path: "bookmarkedPosts",
+      populate: { path: "user", select: "username profileImg" },
+    });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
     }
-
-    return res.status(200).json(currentUser.bookmarkedPosts);
+    res.status(200).json(user.bookmarkedPosts);
   } catch (error) {
-    return res.status(500).json(error.message);
+    res.status(500).json(error.message);
   }
 });
+
+// userRoute.get("/bookmarks", verifyToken, async (req, res) => {
+//   try {
+//     const currentUser = await UserSocial3.findById(req.user.id).populate(
+//       "bookmarkedPosts"
+//     );
+//     if (!currentUser) {
+//       return res.status(404).json({ msg: "User not found!" });
+//     }
+
+//     return res.status(200).json(currentUser.bookmarkedPosts);
+//   } catch (error) {
+//     return res.status(500).json(error.message);
+//   }
+// });
 
 module.exports = userRoute;
