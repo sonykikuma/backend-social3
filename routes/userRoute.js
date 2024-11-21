@@ -19,8 +19,8 @@ userRoute.get("/find/suggestedUsers", verifyToken, async (req, res) => {
       );
     });
 
-    if (suggestedUsers.length > 5) {
-      suggestedUsers = suggestedUsers.slice(0, 5);
+    if (suggestedUsers.length > 10) {
+      suggestedUsers = suggestedUsers.slice(0, 8);
     }
 
     return res.status(200).json(suggestedUsers);
