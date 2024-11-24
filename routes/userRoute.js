@@ -180,80 +180,39 @@ userRoute.put("/toggleFollow/:otherUserId", verifyToken, async (req, res) => {
 });
 
 //bookmark
+//
 userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
   try {
-    const post = await PostSocial3.findById(req.params.postId);
+    const post = await PostSocial3.findById(req.params.postId).populate(
+      "user",
+      "-password"
+    );
     if (!post) {
       return res.status(404).json({ msg: "No such post found" });
-    }
-
-    // Find the user
-    const user = await UserSocial3.findById(req.user.id);
-
-    // Check if the post is already bookmarked
-    const isBookmarked = user.bookmarkedPosts.includes(req.params.postId);
-
-    if (isBookmarked) {
-      // Remove the bookmark
-      await UserSocial3.findByIdAndUpdate(req.user.id, {
-        $pull: { bookmarkedPosts: req.params.postId },
-      });
     } else {
-      // Add the bookmark
-      await UserSocial3.findByIdAndUpdate(req.user.id, {
-        $addToSet: { bookmarkedPosts: req.params.postId },
-      });
+      if (
+        post.user.bookmarkedPosts.some((post) => post._id === req.params.postId)
+      ) {
+        await UserSocial3.findByIdAndUpdate(req.user.id, {
+          $pull: { bookmarkedPosts: post },
+        });
+        return res
+          .status(200)
+          .json({ msg: "Successfully unbookmarked the post" });
+      } else {
+        console.log(post);
+        await UserSocial3.findByIdAndUpdate(req.user.id, {
+          $addToSet: { bookmarkedPosts: post },
+        });
+        return res
+          .status(200)
+          .json({ msg: "Successfully boomkarked the post" });
+      }
     }
-
-    // Fetch the updated user with populated bookmarked posts
-    const updatedUser = await UserSocial3.findById(req.user.id).populate(
-      "bookmarkedPosts"
-    );
-
-    // Return the updated bookmarked posts array
-    return res.status(200).json({
-      msg: isBookmarked
-        ? "Successfully unbookmarked the post"
-        : "Successfully bookmarked the post",
-      bookmarkedPosts: updatedUser.bookmarkedPosts,
-    });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json(error.message);
   }
 });
-
-// userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
-//   try {
-//     const post = await PostSocial3.findById(req.params.postId).populate(
-//       "user",
-//       "-password"
-//     );
-//     if (!post) {
-//       return res.status(404).json({ msg: "No such post found" });
-//     } else {
-//       if (
-//         post.user.bookmarkedPosts.some((post) => post._id === req.params.postId)
-//       ) {
-//         await UserSocial3.findByIdAndUpdate(req.user.id, {
-//           $pull: { bookmarkedPosts: post },
-//         });
-//         return res
-//           .status(200)
-//           .json({ msg: "Successfully unbookmarked the post" });
-//       } else {
-//         console.log(post);
-//         await UserSocial3.findByIdAndUpdate(req.user.id, {
-//           $addToSet: { bookmarkedPosts: post },
-//         });
-//         return res
-//           .status(200)
-//           .json({ msg: "Successfully boomkarked the post" });
-//       }
-//     }
-//   } catch (error) {
-//     return res.status(500).json(error.message);
-//   }
-// });
 
 // Fetching bookmarked posts for a user
 userRoute.get("/bookmarkedPosts", verifyToken, async (req, res) => {
