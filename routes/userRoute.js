@@ -181,6 +181,7 @@ userRoute.put("/toggleFollow/:otherUserId", verifyToken, async (req, res) => {
 
 //bookmark
 
+//original
 // userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
 //   try {
 //     const post = await PostSocial3.findById(req.params.postId).populate(
@@ -216,33 +217,41 @@ userRoute.put("/toggleFollow/:otherUserId", verifyToken, async (req, res) => {
 
 userRoute.put("/bookmark/:postId", verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id; // Extract the logged-in user's ID
+    const userId = req.user.id;
     const { postId } = req.params;
 
-    // Check if the post exists
+    // Checking if the post exists
     const post = await PostSocial3.findById(postId);
     if (!post) {
       return res.status(404).json({ msg: "No such post found" });
     }
 
-    // Fetch the user
+    // Fetching the user
     const user = await UserSocial3.findById(userId);
 
-    // Check if the post is already bookmarked
-    const isBookmarked = user.bookmarkedPosts.includes(postId);
+    // Checking if the post is already bookmarked
+    const isBookmarked = user.bookmarkedPosts.some(
+      (bookmark) => bookmark._id.toString() === postId
+    );
+
+    //const isBookmarked = user.bookmarkedPosts.includes(postId);
 
     if (isBookmarked) {
-      // Remove the bookmark
+      // removing the bookmark
       await UserSocial3.findByIdAndUpdate(userId, {
-        $pull: { bookmarkedPosts: postId },
+        $pull: { bookmarkedPosts: { _id: post._id } },
+
+        //$pull: { bookmarkedPosts: postId },
       });
       return res
         .status(200)
         .json({ msg: "Successfully unbookmarked the post" });
     } else {
-      // Add the bookmark
+      // adding the bookmark
       await UserSocial3.findByIdAndUpdate(userId, {
-        $addToSet: { bookmarkedPosts: postId },
+        $addToSet: { bookmarkedPosts: post },
+
+        // $addToSet: { bookmarkedPosts: postId },
       });
       return res.status(200).json({ msg: "Successfully bookmarked the post" });
     }
@@ -267,6 +276,7 @@ userRoute.get("/bookmarkedPosts", verifyToken, async (req, res) => {
   }
 });
 
+//
 // userRoute.get("/bookmarks", verifyToken, async (req, res) => {
 //   try {
 //     const currentUser = await UserSocial3.findById(req.user.id).populate(
