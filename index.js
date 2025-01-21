@@ -31,19 +31,19 @@ app.use(express.json());
 initializeDatabase();
 
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // Allow all origins
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS"); // Allow specific methods
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  ); // Allow specific headers
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-  next();
-});
-
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "*"); // Allow all origins
+//   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS"); // Allow specific methods
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+//   ); // Allow specific headers
+//   if (req.method === "OPTIONS") {
+//     return res.status(200).end();
+//   }
+//   next();
+// });
+app.use(cors());
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
 app.use("/post", postRoute);
